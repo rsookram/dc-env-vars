@@ -56,3 +56,62 @@ fn format_node(n: &Yaml) -> String {
         _ => panic!("Unexpected YAML node {:?}", n),
     };
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use yaml_rust::YamlLoader;
+
+    #[test]
+    #[should_panic]
+    fn test_missing_environment() {
+        let s = "---
+version: \"3\"
+services:
+  api:
+    build: .
+";
+        let mut out = YamlLoader::load_from_str(s).unwrap();
+        let doc = out.pop().unwrap();
+
+        extract_env_vars(doc, "api");
+    }
+
+    #[test]
+    fn test_array_environment() {
+        let s = "---
+version: \"3\"
+services:
+  api:
+    build: .
+    environment:
+      - DB_USERNAME=root
+      - PORT=80
+";
+        let mut out = YamlLoader::load_from_str(s).unwrap();
+        let doc = out.pop().unwrap();
+
+        let vars = extract_env_vars(doc, "api");
+
+        assert_eq!(vars, vec!["DB_USERNAME=root", "PORT=80"])
+    }
+
+    #[test]
+    fn test_hash_environment() {
+        let s = "---
+version: \"3\"
+services:
+  api:
+    build: .
+    environment:
+      DB_USERNAME: root
+      PORT: 80
+";
+        let mut out = YamlLoader::load_from_str(s).unwrap();
+        let doc = out.pop().unwrap();
+
+        let vars = extract_env_vars(doc, "api");
+
+        assert_eq!(vars, vec!["DB_USERNAME=root", "PORT=80"])
+    }
+}
