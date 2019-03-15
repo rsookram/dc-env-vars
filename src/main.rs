@@ -2,6 +2,8 @@ extern crate yaml_rust;
 
 use yaml_rust::{Yaml, YamlLoader};
 
+const FILE_NAME: &str = "docker-compose.yml";
+
 fn main() {
     let service_option = std::env::args().nth(1);
     let service = match service_option {
@@ -9,13 +11,7 @@ fn main() {
         None => return,
     };
 
-    let data_string = std::fs::read_to_string("docker-compose.yml")
-        .expect("failed to read docker-compose.yml");
-    let data_str = data_string.as_str();
-    let docs = YamlLoader::load_from_str(data_str)
-        .expect("docker-compose.yml doesn't contain valid YAML");
-
-    let doc = &docs[0];
+    let doc = load_yaml_doc(FILE_NAME);
 
     let env = &doc["services"][service]["environment"];
     match env {
@@ -32,6 +28,16 @@ fn main() {
         _ => panic!("Unexpected value for environment {:?}", env),
     }
     println!();
+}
+
+fn load_yaml_doc(name: &str) -> Yaml {
+    let data_string = std::fs::read_to_string(name)
+        .expect(&format!("failed to read {}", name));
+    let data_str = data_string.as_str();
+    let mut docs = YamlLoader::load_from_str(data_str)
+        .expect(&format!("{} doesn't contain valid YAML", name));
+
+    return docs.pop().unwrap();
 }
 
 fn format_node(n: &Yaml) -> String {
