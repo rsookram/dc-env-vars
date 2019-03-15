@@ -25,13 +25,13 @@ fn load_yaml_doc(name: &str) -> Yaml {
     let mut docs = YamlLoader::load_from_str(data_str)
         .expect(&format!("{} doesn't contain valid YAML", name));
 
-    return docs.pop().unwrap();
+    docs.pop().unwrap()
 }
 
 fn extract_env_vars(doc: Yaml, service: &str) -> Vec<String> {
     let env = &doc["services"][service]["environment"];
 
-    return match env {
+    match env {
         yaml_rust::Yaml::Array(a) =>
             a.iter()
                 .map(|n| format_node(n))
@@ -41,20 +41,20 @@ fn extract_env_vars(doc: Yaml, service: &str) -> Vec<String> {
                 .map(|(k, v)| format!("{}={}", format_node(k), format_node(v)))
                 .collect(),
         _ => panic!("Unexpected value for environment {:?}", env),
-    };
+    }
 }
 
 fn format_node(n: &Yaml) -> String {
     use yaml_rust::Yaml::*;
 
-    return match n {
+    match n {
         Real(s) => s.to_string(),
         Integer(i) => format!("{}", i),
         String(s) => s.to_string(),
         Boolean(b) => format!("{}", b),
         Null => "null".to_string(),
         _ => panic!("Unexpected YAML node {:?}", n),
-    };
+    }
 }
 
 #[cfg(test)]
