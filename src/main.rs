@@ -13,21 +13,9 @@ fn main() {
 
     let doc = load_yaml_doc(FILE_NAME);
 
-    let env = &doc["services"][service]["environment"];
-    match env {
-        yaml_rust::Yaml::Array(a) => {
-            for e in a {
-                print!("{} ", format_node(e));
-            }
-        }
-        yaml_rust::Yaml::Hash(h) => {
-            for (k, v) in h {
-                print!("{}={} ", format_node(k), format_node(v));
-            }
-        }
-        _ => panic!("Unexpected value for environment {:?}", env),
-    }
-    println!();
+    let env_vars = extract_env_vars(doc, service);
+
+    println!("{}", env_vars.join(" "));
 }
 
 fn load_yaml_doc(name: &str) -> Yaml {
@@ -38,6 +26,22 @@ fn load_yaml_doc(name: &str) -> Yaml {
         .expect(&format!("{} doesn't contain valid YAML", name));
 
     return docs.pop().unwrap();
+}
+
+fn extract_env_vars(doc: Yaml, service: &str) -> Vec<String> {
+    let env = &doc["services"][service]["environment"];
+
+    return match env {
+        yaml_rust::Yaml::Array(a) =>
+            a.iter()
+                .map(|n| format_node(n))
+                .collect(),
+        yaml_rust::Yaml::Hash(h) =>
+            h.iter()
+                .map(|(k, v)| format!("{}={}", format_node(k), format_node(v)))
+                .collect(),
+        _ => panic!("Unexpected value for environment {:?}", env),
+    };
 }
 
 fn format_node(n: &Yaml) -> String {
