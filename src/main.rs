@@ -65,12 +65,12 @@ mod test {
     #[test]
     #[should_panic]
     fn test_missing_environment() {
-        let s = "---
-version: \"3\"
+        let s = r#"---
+version: "3"
 services:
   api:
     build: .
-";
+"#;
         let mut out = YamlLoader::load_from_str(s).unwrap();
         let doc = out.pop().unwrap();
 
@@ -79,15 +79,15 @@ services:
 
     #[test]
     fn test_array_environment() {
-        let s = "---
-version: \"3\"
+        let s = r#"---
+version: "3"
 services:
   api:
     build: .
     environment:
       - DB_USERNAME=root
       - PORT=80
-";
+"#;
         let mut out = YamlLoader::load_from_str(s).unwrap();
         let doc = out.pop().unwrap();
 
@@ -98,15 +98,15 @@ services:
 
     #[test]
     fn test_hash_environment() {
-        let s = "---
-version: \"3\"
+        let s = r#"---
+version: "3"
 services:
   api:
     build: .
     environment:
       DB_USERNAME: root
       PORT: 80
-";
+"#;
         let mut out = YamlLoader::load_from_str(s).unwrap();
         let doc = out.pop().unwrap();
 
