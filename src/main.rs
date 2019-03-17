@@ -20,10 +20,10 @@ fn main() {
 
 fn load_yaml_doc(name: &str) -> Yaml {
     let data_string = std::fs::read_to_string(name)
-        .expect(&format!("failed to read {}", name));
+        .unwrap_or_else(|_| panic!("failed to read {}", name));
     let data_str = data_string.as_str();
     let mut docs = YamlLoader::load_from_str(data_str)
-        .expect(&format!("{} doesn't contain valid YAML", name));
+        .unwrap_or_else(|_| panic!("{} doesn't contain valid YAML", name));
 
     docs.pop().unwrap()
 }
