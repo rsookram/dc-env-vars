@@ -19,8 +19,8 @@ fn main() {
 }
 
 fn load_yaml_doc(name: &str) -> Yaml {
-    let data_string = std::fs::read_to_string(name)
-        .unwrap_or_else(|_| panic!("failed to read {}", name));
+    let data_string =
+        std::fs::read_to_string(name).unwrap_or_else(|_| panic!("failed to read {}", name));
     let data_str = data_string.as_str();
     let mut docs = YamlLoader::load_from_str(data_str)
         .unwrap_or_else(|_| panic!("{} doesn't contain valid YAML", name));
@@ -32,14 +32,11 @@ fn extract_env_vars(doc: Yaml, service: &str) -> Vec<String> {
     let env = &doc["services"][service]["environment"];
 
     match env {
-        yaml_rust::Yaml::Array(a) =>
-            a.iter()
-                .map(|n| format_node(n))
-                .collect(),
-        yaml_rust::Yaml::Hash(h) =>
-            h.iter()
-                .map(|(k, v)| format!("{}={}", format_node(k), format_node(v)))
-                .collect(),
+        yaml_rust::Yaml::Array(a) => a.iter().map(|n| format_node(n)).collect(),
+        yaml_rust::Yaml::Hash(h) => h
+            .iter()
+            .map(|(k, v)| format!("{}={}", format_node(k), format_node(v)))
+            .collect(),
         _ => panic!("Unexpected value for environment {:?}", env),
     }
 }
